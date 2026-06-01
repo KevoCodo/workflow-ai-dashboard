@@ -28,121 +28,29 @@ export class WorkflowsSeed implements OnModuleInit {
       >
     > = [
       {
-        name: 'Blog Draft Workflow',
-        slug: 'blog-draft',
+        name: 'Content Summary',
+        slug: 'content-summary',
         description:
-          'Generate a structured blog post draft from a topic and basic preferences (simulated).',
-        category: 'Content Automation',
-        status: WorkflowStatus.Active,
-        providerType: ProviderType.Simulated,
-        inputSchema: {
-          fields: [
-            { name: 'topic', label: 'Topic', type: 'text', required: true },
-            {
-              name: 'audience',
-              label: 'Audience',
-              type: 'text',
-              required: true,
-            },
-            { name: 'tone', label: 'Tone', type: 'text', required: false },
-          ],
-        },
-      },
-      {
-        name: 'Report Summary Workflow',
-        slug: 'report-summary',
-        description:
-          'Summarize a pasted report into key takeaways and action items (simulated).',
-        category: 'Business Reporting',
+          'Summarize public-safe content for a specific audience and tone.',
+        category: 'Content Operations',
         status: WorkflowStatus.Active,
         providerType: ProviderType.Simulated,
         inputSchema: {
           fields: [
             {
-              name: 'reportText',
-              label: 'Report Text',
-              type: 'textarea',
-              required: true,
-            },
-            {
-              name: 'summaryLength',
-              label: 'Summary Length',
-              type: 'text',
-              required: false,
-              placeholder: 'short | medium | long',
-            },
-          ],
-        },
-      },
-      {
-        name: 'Intake Classification Workflow',
-        slug: 'intake-classification',
-        description:
-          'Classify an intake message into a category and priority (simulated).',
-        category: 'Workflow Routing',
-        status: WorkflowStatus.Active,
-        providerType: ProviderType.Simulated,
-        inputSchema: {
-          fields: [
-            {
-              name: 'intakeText',
-              label: 'Intake Text',
-              type: 'textarea',
-              required: true,
-            },
-          ],
-        },
-      },
-      {
-        name: 'Meeting Summary Workflow',
-        slug: 'meeting-summary',
-        description:
-          'Turn meeting notes into a concise recap and next steps (simulated).',
-        category: 'Internal Operations',
-        status: WorkflowStatus.Active,
-        providerType: ProviderType.Simulated,
-        inputSchema: {
-          fields: [
-            {
-              name: 'notesText',
-              label: 'Meeting Notes',
-              type: 'textarea',
-              required: true,
-            },
-            {
-              name: 'attendees',
-              label: 'Attendees (optional)',
-              type: 'text',
-              required: false,
-              placeholder: 'Comma-separated names',
-            },
-          ],
-        },
-      },
-      {
-        name: 'AI Business Summary Workflow',
-        slug: 'ai-business-summary',
-        description:
-          'Generates a concise business summary from structured notes using the selected execution provider.',
-        category: 'AI Provider Demo',
-        status: WorkflowStatus.Active,
-        providerType: ProviderType.Simulated,
-        inputSchema: {
-          fields: [
-            {
-              name: 'notes',
-              label: 'Structured Notes',
+              name: 'content',
+              label: 'Content',
               type: 'textarea',
               required: true,
               placeholder:
-                'Example: Launch checklist complete; two review items remain; next review Friday.',
+                'Paste sanitized content, notes, or source material for the demo.',
             },
             {
               name: 'audience',
               label: 'Audience',
               type: 'text',
-              required: false,
-              placeholder: 'Leadership team',
+              required: true,
+              placeholder: 'Example: operations team',
             },
             {
               name: 'tone',
@@ -152,7 +60,131 @@ export class WorkflowsSeed implements OnModuleInit {
               options: [
                 { label: 'Concise', value: 'Concise' },
                 { label: 'Professional', value: 'Professional' },
-                { label: 'Action-oriented', value: 'Action-oriented' },
+                { label: 'Executive', value: 'Executive' },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        name: 'Meeting Notes',
+        slug: 'meeting-notes',
+        description:
+          'Turn sanitized meeting notes into a concise recap and follow-up list.',
+        category: 'Internal Operations',
+        status: WorkflowStatus.Active,
+        providerType: ProviderType.Simulated,
+        inputSchema: {
+          fields: [
+            {
+              name: 'notes',
+              label: 'Meeting Notes',
+              type: 'textarea',
+              required: true,
+              placeholder:
+                '- Reviewed project status\n- Confirmed next milestone\n- Assigned follow-up owners',
+            },
+            {
+              name: 'followUpStyle',
+              label: 'Follow-up Style',
+              type: 'select',
+              required: false,
+              options: [
+                { label: 'Action items', value: 'Action items' },
+                { label: 'Executive recap', value: 'Executive recap' },
+                { label: 'Team update', value: 'Team update' },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        name: 'Lead Qualification',
+        slug: 'lead-qualification',
+        description:
+          'Score a generic inbound lead and suggest a practical next step.',
+        category: 'Sales Operations',
+        status: WorkflowStatus.Active,
+        providerType: ProviderType.Simulated,
+        inputSchema: {
+          fields: [
+            {
+              name: 'leadDetails',
+              label: 'Lead Details',
+              type: 'textarea',
+              required: true,
+              placeholder:
+                'Example: Small business owner asked about automating weekly reporting.',
+            },
+            {
+              name: 'businessType',
+              label: 'Business Type',
+              type: 'text',
+              required: true,
+              placeholder: 'Example: B2B services',
+            },
+          ],
+        },
+      },
+      {
+        name: 'Blog Outline',
+        slug: 'blog-outline',
+        description:
+          'Create a structured blog outline from a topic, audience, and keyword.',
+        category: 'Content Operations',
+        status: WorkflowStatus.Active,
+        providerType: ProviderType.Simulated,
+        inputSchema: {
+          fields: [
+            {
+              name: 'topic',
+              label: 'Topic',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'audience',
+              label: 'Audience',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'keyword',
+              label: 'Keyword',
+              type: 'text',
+              required: false,
+              placeholder: 'Example: workflow automation',
+            },
+          ],
+        },
+      },
+      {
+        name: 'Customer Support Response',
+        slug: 'customer-support-response',
+        description:
+          'Draft a generic, public-safe support response from a customer message.',
+        category: 'Customer Operations',
+        status: WorkflowStatus.Active,
+        providerType: ProviderType.Simulated,
+        inputSchema: {
+          fields: [
+            {
+              name: 'customerMessage',
+              label: 'Customer Message',
+              type: 'textarea',
+              required: true,
+              placeholder:
+                'Example: I need help understanding the status of my request.',
+            },
+            {
+              name: 'tone',
+              label: 'Tone',
+              type: 'select',
+              required: false,
+              options: [
+                { label: 'Helpful', value: 'Helpful' },
+                { label: 'Professional', value: 'Professional' },
+                { label: 'Apologetic', value: 'Apologetic' },
               ],
             },
           ],
@@ -163,19 +195,39 @@ export class WorkflowsSeed implements OnModuleInit {
     const slugs = seeds.map((s) => s.slug);
     const existing = await this.workflowsRepo.find({
       where: slugs.map((slug) => ({ slug })),
-      select: { slug: true },
     });
-    const existingSlugs = new Set(existing.map((w) => w.slug));
+    const existingBySlug = new Map(existing.map((w) => [w.slug, w]));
 
-    const toInsert = seeds.filter((s) => !existingSlugs.has(s.slug));
-    if (toInsert.length === 0) {
-      this.logger.log('Seeded workflows skipped (already present).');
-      return;
+    const toInsert = seeds.filter((s) => !existingBySlug.has(s.slug));
+    const toUpdate = seeds
+      .map((seed) => {
+        const workflow = existingBySlug.get(seed.slug);
+        if (!workflow) return null;
+        return this.workflowsRepo.create({
+          ...workflow,
+          ...seed,
+          id: workflow.id,
+        });
+      })
+      .filter((workflow): workflow is WorkflowEntity => workflow != null);
+
+    if (toInsert.length > 0) {
+      await this.workflowsRepo.insert(toInsert);
+      this.logger.log(
+        `Seeded workflows: ${toInsert.map((s) => s.slug).join(', ')}`,
+      );
     }
 
-    await this.workflowsRepo.insert(toInsert);
-    this.logger.log(
-      `Seeded workflows: ${toInsert.map((s) => s.slug).join(', ')}`,
-    );
+    if (toUpdate.length > 0) {
+      await this.workflowsRepo.save(toUpdate);
+      this.logger.log(
+        `Updated seeded workflows: ${toUpdate.map((s) => s.slug).join(', ')}`,
+      );
+    }
+
+    if (toInsert.length === 0 && toUpdate.length === 0) {
+      this.logger.log('Seeded workflows skipped (already current).');
+      return;
+    }
   }
 }

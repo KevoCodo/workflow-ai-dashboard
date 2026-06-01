@@ -79,26 +79,42 @@ export class SimulatedWorkflowProvider implements WorkflowExecutionProvider {
 
     const topic =
       typeof inputPayload.topic === 'string' ? inputPayload.topic.trim() : null;
+    const keyword =
+      typeof inputPayload.keyword === 'string'
+        ? inputPayload.keyword.trim()
+        : null;
     const audience =
       typeof inputPayload.audience === 'string'
         ? inputPayload.audience.trim()
         : null;
     const tone =
       typeof inputPayload.tone === 'string' ? inputPayload.tone.trim() : null;
+    const content =
+      typeof inputPayload.content === 'string'
+        ? inputPayload.content.trim()
+        : null;
     const reportText =
       typeof inputPayload.reportText === 'string'
         ? inputPayload.reportText.trim()
         : null;
-    const notesText =
-      typeof inputPayload.notesText === 'string'
-        ? inputPayload.notesText.trim()
-        : null;
-    const intakeText =
-      typeof inputPayload.intakeText === 'string'
-        ? inputPayload.intakeText.trim()
-        : null;
     const notes =
       typeof inputPayload.notes === 'string' ? inputPayload.notes.trim() : null;
+    const followUpStyle =
+      typeof inputPayload.followUpStyle === 'string'
+        ? inputPayload.followUpStyle.trim()
+        : null;
+    const leadDetails =
+      typeof inputPayload.leadDetails === 'string'
+        ? inputPayload.leadDetails.trim()
+        : null;
+    const businessType =
+      typeof inputPayload.businessType === 'string'
+        ? inputPayload.businessType.trim()
+        : null;
+    const customerMessage =
+      typeof inputPayload.customerMessage === 'string'
+        ? inputPayload.customerMessage.trim()
+        : null;
 
     const safeSnippet = (text: string, maxLen: number) =>
       text.length <= maxLen ? text : `${text.slice(0, maxLen).trim()}...`;
@@ -111,105 +127,115 @@ export class SimulatedWorkflowProvider implements WorkflowExecutionProvider {
         .slice(0, 12);
 
     switch (workflowSlug) {
-      case 'blog-draft': {
-        const titleBase = topic ?? 'Sample topic';
-        const audienceText = audience ?? 'a general technical audience';
-        const toneText = tone ?? 'Clear and practical';
-        const outline = [
-          `Why ${titleBase} matters`,
-          'Core concepts',
-          'Common pitfalls',
-          'A simple implementation approach',
-          'Next steps',
-        ];
-        return {
-          title: `Blog Draft: ${titleBase}`,
-          meta: {
-            audience: audienceText,
-            tone: toneText,
-          },
-          outline,
-          draft: [
-            `This is a simulated blog draft about ${titleBase}.`,
-            `Target audience: ${audienceText}. Tone: ${toneText}.`,
-            '',
-            `Intro: ${titleBase} is a useful pattern for turning repeatable work into consistent outcomes.`,
-            'Key points: define inputs/outputs, track run state, and log every step for observability.',
-            'Conclusion: start with simulation, then add optional integrations behind feature flags.',
-          ].join('\n'),
-        };
-      }
-      case 'report-summary': {
-        const base = reportText ?? 'Report text not provided';
+      case 'content-summary': {
+        const base = content ?? reportText ?? 'Content not provided';
         const snippet = safeSnippet(base, 220);
         return {
-          summary: `Simulated summary based on the provided report text: ${snippet}`,
+          summary: `Simulated ${tone ?? 'Concise'} summary for ${audience ?? 'a general audience'}: ${snippet}`,
           keyPoints: [
-            'Key trend: a notable change over the reporting period.',
-            'Risk: a potential blocker requiring attention.',
-            'Opportunity: an area to optimize or automate.',
+            'Main idea captured from the provided source material.',
+            'Important context rewritten for the intended audience.',
+            'Recommended next step identified for follow-up.',
           ],
           actionItems: [
-            'Validate assumptions and confirm data sources.',
-            'Assign an owner to the highest-risk item.',
-            'Draft a short follow-up plan with next steps.',
+            'Review the summary for domain-specific nuance.',
+            'Share the concise version with the intended audience.',
           ],
         };
       }
-      case 'intake-classification': {
-        const text = (intakeText ?? '').toLowerCase();
-        const hasUrgent = /urgent|asap|immediately|critical/.test(text);
-        const hasBug = /bug|error|broken|issue|incident/.test(text);
-        const hasChange = /change|request|feature|enhancement/.test(text);
-
-        const category = hasBug
-          ? 'Incident'
-          : hasChange
-            ? 'Change Request'
-            : 'General Inquiry';
-        const priority = hasUrgent ? 'High' : hasBug ? 'Medium' : 'Low';
-        const confidence = hasUrgent || hasBug || hasChange ? 0.78 : 0.55;
-
-        return {
-          category,
-          priority,
-          confidence,
-          rationale:
-            'Simulated classification using deterministic keyword rules.',
-        };
-      }
-      case 'meeting-summary': {
-        const lines = notesText ? normalizeLines(notesText) : [];
+      case 'meeting-notes': {
+        const lines = notes ? normalizeLines(notes) : [];
         const bullets = lines.map((l) => l.replace(/^[-*]\s*/, ''));
         return {
           summary:
             bullets.length > 0
-              ? `Simulated meeting summary based on ${bullets.length} note items.`
-              : 'Simulated meeting summary based on the provided notes.',
+              ? `Simulated meeting recap based on ${bullets.length} note item${bullets.length === 1 ? '' : 's'}.`
+              : 'Simulated meeting recap based on the provided notes.',
+          followUpStyle: followUpStyle ?? 'Action items',
           decisions: bullets.slice(0, 2),
           nextSteps: [
-            'Confirm owners for each action item.',
-            'Schedule a short follow-up check-in.',
-            'Publish the recap to the team channel.',
+            'Confirm owners for open action items.',
+            'Share the recap with meeting participants.',
+            'Schedule the next checkpoint if needed.',
           ],
         };
       }
+      case 'lead-qualification': {
+        const text = `${leadDetails ?? ''} ${businessType ?? ''}`.toLowerCase();
+        const hasUrgency = /urgent|soon|this month|asap|immediately/.test(text);
+        const hasBudget = /budget|approved|funded|paid|contract/.test(text);
+        const hasFit = /automation|workflow|reporting|operations|support/.test(
+          text,
+        );
+        const score = [hasUrgency, hasBudget, hasFit].filter(Boolean).length;
+        return {
+          qualification: score >= 2 ? 'Qualified' : 'Needs Nurture',
+          score,
+          businessType: businessType ?? 'General business',
+          rationale:
+            'Simulated qualification using deterministic fit, urgency, and budget signals.',
+          nextStep:
+            score >= 2
+              ? 'Schedule a discovery call with a concise agenda.'
+              : 'Send a short follow-up asking about timeline and goals.',
+        };
+      }
+      case 'blog-outline': {
+        const titleBase = topic ?? 'Sample topic';
+        const audienceText = audience ?? 'a general technical audience';
+        const keywordText = keyword ?? 'workflow automation';
+        return {
+          title: `${titleBase}: Practical Guide`,
+          meta: {
+            audience: audienceText,
+            keyword: keywordText,
+          },
+          outline: [
+            `Why ${titleBase} matters for ${audienceText}`,
+            `Core concepts behind ${keywordText}`,
+            'Common pitfalls to avoid',
+            'Implementation checklist',
+            'Conclusion and next steps',
+          ],
+          suggestedIntro: `This simulated outline frames ${titleBase} for ${audienceText} with a focus on ${keywordText}.`,
+        };
+      }
+      case 'customer-support-response': {
+        const snippet = safeSnippet(
+          customerMessage ?? 'Customer message not provided',
+          180,
+        );
+        return {
+          tone: tone ?? 'Helpful',
+          response:
+            `Thanks for reaching out. I understand the request as: "${snippet}" ` +
+            'I will review the details, confirm the current status, and follow up with the next available step.',
+          checklist: [
+            'Acknowledge the customer concern.',
+            'Confirm what will be checked.',
+            'Set a clear next step without overpromising.',
+          ],
+        };
+      }
+      case 'blog-draft':
+      case 'report-summary':
+      case 'intake-classification':
+      case 'meeting-summary':
       case 'ai-business-summary': {
+        // Legacy seed slugs are retained only for older local databases.
         const notesItems = notes ? normalizeLines(notes) : [];
         return {
-          headline:
-            'Business Summary: Current status and recommended next step',
+          headline: 'Legacy Demo Workflow Output',
           audience: audience ?? 'Business stakeholders',
           tone: tone ?? 'Professional',
           executiveSummary:
             notesItems.length > 0
               ? `Simulated summary based on ${notesItems.length} structured note item${notesItems.length === 1 ? '' : 's'}.`
-              : 'Simulated summary prepared from the supplied business notes.',
+              : `Simulated output generated for legacy workflow slug: ${workflowSlug}.`,
           highlights: notesItems.slice(0, 3),
           recommendedActions: [
-            'Confirm the highest-priority open item and its owner.',
-            'Share a concise status update with the intended audience.',
-            'Schedule the next review point and capture decisions.',
+            'Use the updated demo workflow templates for new portfolio runs.',
+            'Keep existing historical runs available for traceability.',
           ],
         };
       }

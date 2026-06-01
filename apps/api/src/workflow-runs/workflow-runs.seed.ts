@@ -60,29 +60,26 @@ export class WorkflowRunsSeed implements OnModuleInit {
       logs: Array<{ stepName: string; message: string }>;
     }> = [
       {
-        slug: 'blog-draft',
+        slug: 'content-summary',
         status: WorkflowRunStatus.Completed,
         inputPayload: {
-          topic: 'AI workflow dashboards',
-          audience: 'Engineers',
-          tone: 'Pragmatic',
+          content:
+            'The operations team launched a workflow dashboard to track requests, run status, provider routing, and follow-up actions.',
+          audience: 'Operations leaders',
+          tone: 'Concise',
         },
         outputPayload: {
-          title: 'Blog Draft: AI workflow dashboards',
-          meta: { audience: 'Engineers', tone: 'Pragmatic' },
-          outline: [
-            'Why AI workflow dashboards matters',
-            'Core concepts',
-            'Common pitfalls',
-            'A simple implementation approach',
-            'Next steps',
+          summary:
+            'Simulated Concise summary for Operations leaders: The operations team launched a workflow dashboard to track requests, run status, provider routing, and follow-up actions.',
+          keyPoints: [
+            'Main idea captured from the provided source material.',
+            'Important context rewritten for the intended audience.',
+            'Recommended next step identified for follow-up.',
           ],
-          draft:
-            'This is a simulated blog draft about AI workflow dashboards.\n' +
-            'Target audience: Engineers. Tone: Pragmatic.\n\n' +
-            'Intro: AI workflow dashboards is a useful pattern for turning repeatable work into consistent outcomes.\n' +
-            'Key points: define inputs/outputs, track run state, and log every step for observability.\n' +
-            'Conclusion: start with simulation, then add optional integrations behind feature flags.',
+          actionItems: [
+            'Review the summary for domain-specific nuance.',
+            'Share the concise version with the intended audience.',
+          ],
         },
         errorMessage: null,
         startedAt: mkDate(55),
@@ -98,7 +95,7 @@ export class WorkflowRunsSeed implements OnModuleInit {
           },
           {
             stepName: 'routing',
-            message: 'Routing to workflow runner: blog-draft',
+            message: 'Routing to workflow runner: content-summary',
           },
           {
             stepName: 'simulated_processing',
@@ -116,11 +113,12 @@ export class WorkflowRunsSeed implements OnModuleInit {
         ],
       },
       {
-        slug: 'report-summary',
+        slug: 'lead-qualification',
         status: WorkflowRunStatus.Failed,
         inputPayload: {
-          reportText: 'Quarterly report text (sanitized sample)...',
-          summaryLength: 'short',
+          leadDetails:
+            'A regional services team asked about automating weekly reporting but has not confirmed budget.',
+          businessType: 'B2B services',
         },
         outputPayload: null,
         errorMessage:
@@ -143,7 +141,7 @@ export class WorkflowRunsSeed implements OnModuleInit {
           },
           {
             stepName: 'routing',
-            message: 'Routing to workflow runner: report-summary',
+            message: 'Routing to workflow runner: lead-qualification',
           },
           {
             stepName: 'simulated_processing',
@@ -158,10 +156,12 @@ export class WorkflowRunsSeed implements OnModuleInit {
         ],
       },
       {
-        slug: 'intake-classification',
+        slug: 'blog-outline',
         status: WorkflowRunStatus.Running,
         inputPayload: {
-          intakeText: 'Customer asked for a change request with high urgency.',
+          topic: 'AI workflow dashboards',
+          audience: 'Engineering managers',
+          keyword: 'workflow automation',
         },
         outputPayload: null,
         errorMessage: null,
@@ -174,7 +174,7 @@ export class WorkflowRunsSeed implements OnModuleInit {
           },
           {
             stepName: 'routing',
-            message: 'Routing to workflow runner: intake-classification',
+            message: 'Routing to workflow runner: blog-outline',
           },
           {
             stepName: 'simulated_processing',
@@ -184,11 +184,12 @@ export class WorkflowRunsSeed implements OnModuleInit {
         ],
       },
       {
-        slug: 'meeting-summary',
+        slug: 'meeting-notes',
         status: WorkflowRunStatus.Queued,
         inputPayload: {
-          notesText:
+          notes:
             '- Discussed milestones\n- Identified risks\n- Next steps agreed',
+          followUpStyle: 'Action items',
         },
         outputPayload: null,
         errorMessage: null,
@@ -198,6 +199,55 @@ export class WorkflowRunsSeed implements OnModuleInit {
           {
             stepName: 'queued',
             message: 'Workflow run created and queued for simulated execution.',
+          },
+        ],
+      },
+      {
+        slug: 'customer-support-response',
+        status: WorkflowRunStatus.Completed,
+        inputPayload: {
+          customerMessage:
+            'I need help understanding when my request will be reviewed.',
+          tone: 'Helpful',
+        },
+        outputPayload: {
+          tone: 'Helpful',
+          response:
+            'Thanks for reaching out. I understand the request as: "I need help understanding when my request will be reviewed." I will review the details, confirm the current status, and follow up with the next available step.',
+          checklist: [
+            'Acknowledge the customer concern.',
+            'Confirm what will be checked.',
+            'Set a clear next step without overpromising.',
+          ],
+        },
+        errorMessage: null,
+        startedAt: mkDate(18),
+        completedAt: mkDate(17),
+        logs: [
+          {
+            stepName: 'queued',
+            message: 'Workflow run created and queued for simulated execution.',
+          },
+          {
+            stepName: 'validation',
+            message: 'Validating input payload against workflow input schema.',
+          },
+          {
+            stepName: 'routing',
+            message: 'Routing to workflow runner: customer-support-response',
+          },
+          {
+            stepName: 'simulated_processing',
+            message:
+              'Simulating processing (deterministic, no external calls).',
+          },
+          {
+            stepName: 'formatting',
+            message: 'Formatting simulated output payload.',
+          },
+          {
+            stepName: 'completed',
+            message: 'Workflow run completed successfully (simulated).',
           },
         ],
       },

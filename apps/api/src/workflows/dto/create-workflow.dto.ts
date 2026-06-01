@@ -20,7 +20,8 @@ export class CreateWorkflowDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must be lowercase and use hyphens only (example: report-summary).',
+    message:
+      'Slug must be lowercase and use hyphens only (example: content-summary).',
   })
   slug!: string;
 
