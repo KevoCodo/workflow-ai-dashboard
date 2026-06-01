@@ -16,6 +16,7 @@ This project is a public portfolio showcase. It must remain generic, sanitized, 
 - Executable external connectors and integrations beyond the explicitly opt-in OpenAI adapter (Anthropic, n8n, etc.)
 - A visual workflow builder (drag-and-drop authoring, versioning, publishing pipelines)
 - Background job infrastructure (queues/workers) beyond simple in-process simulation
+- Scheduled retries, human review queues, evaluation scoring, or role-based access
 - Production hardening claims (autoscaling, SOC2-style controls, etc.)
 
 ## Provider adapter scope (Phase 11+ / Phase 13A / Phase 14A)

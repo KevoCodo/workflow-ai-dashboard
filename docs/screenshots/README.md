@@ -1,20 +1,19 @@
 # Screenshot Guide
 
-Use only generic, sanitized data. The API can seed sample runs to make the UI screenshot-ready (only when the database is empty).
+Use only generic, sanitized data. The API can seed sample runs to make the UI screenshot-ready when the database is empty.
 
-## Suggested screenshots
-- `dashboard.png`: dashboard overview (stats + recent activity + status breakdown)
-- `workflows.png`: workflow catalog grouped by category/status
-- `workflow-editor.png`: workflow template editor (create/edit)
-- `workflow-detail.png`: `AI Business Summary Workflow` detail showing provider explanation and schema-driven input form
-- `run-detail.png`: completed simulated run showing provider metadata and provider lifecycle timeline entries
-- `provider-disabled.png`: optional OpenAI-selected run showing the clean disabled/missing-configuration state
-- `analytics.png`: observability sections including provider distribution
-- `architecture.png`: architecture + provider adapter page
+## Required screenshots
+- `dashboard-metrics.png`: dashboard metric cards showing total, successful, failed, retried, success rate, and average runtime.
+- `workflow-catalog.png`: workflow catalog showing seeded public-safe templates, category, provider, and description.
+- `workflow-execution-form.png`: seeded demo workflow detail with provider status and schema-driven input form.
+- `execution-timeline.png`: run detail page showing normalized execution timeline events and ordered logs.
+- `failed-run-retry.png`: failed retry-eligible run showing failure metadata and retry action.
+- `provider-configuration.png`: provider architecture/status page or provider section showing simulated active and OpenAI optional/disabled state.
+- `architecture-page.png`: architecture page showing the system/provider overview.
 
 ## Capture tips
-- Prefer a consistent viewport width (e.g., 1280px+) and zoom.
-- Keep browser chrome minimal if you're creating a featured image.
-- Use only fake names and generic sample content.
+- Prefer a consistent desktop viewport such as 1280px wide.
+- Keep browser chrome minimal for portfolio images.
+- Use only seeded or fake sample data.
+- Keep OpenAI disabled unless you are intentionally capturing the optional configuration state.
 - If you access the web UI by a non-localhost hostname/IP, set `NEXT_ALLOWED_DEV_ORIGINS` and restart the web dev server.
-

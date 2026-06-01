@@ -2,7 +2,7 @@
 
 ## High-level system architecture
 
-The system is split into a web UI (Next.js) and an API server (NestJS). The backend owns workflow definitions, run orchestration, persistence, and a safe simulation-based execution layer. PostgreSQL stores workflows, runs, and logs.
+The system is split into a web UI (Next.js) and an API server (NestJS). The backend owns workflow definitions, run orchestration, failure classification, retry execution, persistence, and provider-based execution. PostgreSQL stores workflows, runs, logs, and normalized workflow events.
 
 ## Frontend responsibilities
 
@@ -33,6 +33,7 @@ The system is split into a web UI (Next.js) and an API server (NestJS). The back
 - Persist workflow definitions (seeded on startup in the MVP)
 - Persist workflow runs (inputs, status transitions, timestamps, outputs)
 - Persist workflow logs (append-only records)
+- Persist workflow events (normalized lifecycle records for timelines)
 
 ## Provider adapter layer (MVP)
 
@@ -83,7 +84,7 @@ Workflow events are normalized lifecycle records separate from detailed executio
 
 ## Seeding (demo readiness)
 
-- Workflows are seeded on API startup (idempotent upsert by `slug`).
+- Public-safe demo workflows are seeded on API startup (idempotent insert by `slug`): Content Summary, Meeting Notes, Lead Qualification, Blog Outline, and Customer Support Response.
 - Sample runs can be seeded for screenshot-ready UI in non-production environments (only when the database has zero runs).
 
 ## Text-based architecture diagram
@@ -93,7 +94,12 @@ Browser (Next.js UI)
         |
         |  REST/JSON
         v
-NestJS API (Workflows + Runs + Logs + Analytics)
+NestJS API
+        |-- Workflow Service
+        |-- Workflow Run / Retry Service
+        |-- Failure Classifier
+        |-- Event Log Service
+        |-- Metrics / Analytics Service
         |
         |  resolve provider
         v
@@ -104,5 +110,5 @@ Provider Registry
         |
         |  TypeORM
         v
-PostgreSQL (workflow, workflow_run, workflow_log)
+PostgreSQL (workflow, workflow_run, workflow_log, workflow_event)
 ```

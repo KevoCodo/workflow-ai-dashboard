@@ -20,7 +20,7 @@ Use these points for interview walkthroughs, GitHub/LinkedIn copy, or a short de
 
 ## Demo flow (30–60 seconds)
 1. Open the dashboard to show seeded workflows and sample runs.
-2. Open the seeded AI Business Summary workflow and show its provider explanation and input form.
+2. Open a seeded demo workflow such as Content Summary or Customer Support Response and show its provider explanation and input form.
 3. Open the run detail page to show:
    - run status + timestamps
    - provider lifecycle logs
