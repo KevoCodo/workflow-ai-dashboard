@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   api,
   getApiBaseUrl,
+  getRunExecutionProvider,
   type AnalyticsOverview,
   type AnalyticsRecentActivityRow,
   type AnalyticsStatusBreakdown,
@@ -56,7 +57,7 @@ function countRunsByProvider(
 ): Record<ProviderType, number> {
   return runs.reduce(
     (counts, run) => {
-      const provider = run.workflow?.providerType ?? "simulated";
+      const provider = getRunExecutionProvider(run);
       counts[provider] += 1;
       return counts;
     },
@@ -242,43 +243,7 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Workflows</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold tracking-tight">
-              {state.kind === "ready"
-                ? formatCount(state.overview.totalWorkflows)
-                : "-"}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {state.kind === "ready"
-                ? `Active: ${formatCount(state.overview.activeWorkflows)} · Inactive: ${formatCount(state.overview.inactiveWorkflows)}`
-                : "Loading workflow catalog..."}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Active Workflows</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold tracking-tight">
-              {state.kind === "ready"
-                ? formatCount(state.overview.activeWorkflows)
-                : "-"}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {state.kind === "ready"
-                ? `Inactive: ${formatCount(state.overview.inactiveWorkflows)}`
-                : "Loading workflow catalog..."}
-            </div>
-          </CardContent>
-        </Card>
-
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <Card>
           <CardHeader>
             <CardTitle>Total Runs</CardTitle>
@@ -291,7 +256,30 @@ export default function DashboardPage() {
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               {state.kind === "ready"
-                ? `Completed: ${formatCount(state.overview.completedRuns)} · Failed: ${formatCount(state.overview.failedRuns)}`
+                ? state.overview.totalRuns > 0
+                  ? "All recorded workflow runs"
+                  : "No runs recorded yet"
+                : "Loading run history..."}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Successful Runs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold tracking-tight">
+              {state.kind === "ready"
+                ? formatCount(
+                    state.overview.successfulRuns ??
+                      state.overview.completedRuns,
+                  )
+                : "-"}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {state.kind === "ready"
+                ? "Runs completed successfully"
                 : "Loading run history..."}
             </div>
           </CardContent>
@@ -309,14 +297,30 @@ export default function DashboardPage() {
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               {state.kind === "ready"
-                ? `Success rate: ${formatPercent(state.overview.successRate)}`
-                : "Loading metrics..."}
+                ? "Runs ending in failed status"
+                : "Loading run history..."}
             </div>
           </CardContent>
         </Card>
-      </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Retried Runs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold tracking-tight">
+              {state.kind === "ready"
+                ? formatCount(state.overview.retriedRuns ?? 0)
+                : "-"}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {state.kind === "ready"
+                ? "Runs created from retry attempts"
+                : "Loading retry metrics..."}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Success Rate</CardTitle>
@@ -329,7 +333,9 @@ export default function DashboardPage() {
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               {state.kind === "ready"
-                ? "Completed / (completed + failed)"
+                ? state.overview.totalRuns > 0
+                  ? "Successful runs / total runs"
+                  : "No runs recorded yet"
                 : "Loading metrics..."}
             </div>
           </CardContent>
@@ -337,44 +343,28 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Average Execution Time</CardTitle>
+            <CardTitle>Average Runtime</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tracking-tight">
               {state.kind === "ready"
-                ? formatDurationMs(state.overview.averageExecutionTimeMs)
+                ? formatDurationMs(
+                    state.overview.averageRuntimeMs ??
+                      state.overview.averageExecutionTimeMs,
+                  )
                 : "-"}
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               {state.kind === "ready"
-                ? "Across finished runs (startedAt + completedAt)"
+                ? (state.overview.successfulRuns ??
+                    state.overview.completedRuns) > 0
+                  ? "Average for completed runs"
+                  : "No completed runs yet"
                 : "Loading metrics..."}
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Most Used Workflow</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {state.kind === "ready" && state.overview.mostUsedWorkflow ? (
-              <div className="space-y-1">
-                <div className="text-sm font-medium">
-                  {state.overview.mostUsedWorkflow.workflowName}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  <code>{state.overview.mostUsedWorkflow.workflowSlug}</code> ·{" "}
-                  {formatCount(state.overview.mostUsedWorkflow.totalRuns)} runs
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">-</div>
-            )}
-          </CardContent>
-        </Card>
       </section>
-
       <section className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -623,7 +613,7 @@ export default function DashboardPage() {
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
               Usage and health summary by workflow template (runs, success rate,
-              average execution time).
+              average runtime).
             </div>
             {state.kind === "ready" && state.usage.length > 0 ? (
               <div className="space-y-3">

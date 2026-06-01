@@ -73,11 +73,14 @@ export type AnalyticsOverview = {
   activeWorkflows: number;
   inactiveWorkflows: number;
   totalRuns: number;
+  successfulRuns: number;
   completedRuns: number;
   failedRuns: number;
   queuedRuns: number;
   runningRuns: number;
+  retriedRuns: number;
   successRate: number;
+  averageRuntimeMs: number;
   averageExecutionTimeMs: number;
   mostUsedWorkflow: {
     workflowId: string;
@@ -129,6 +132,36 @@ export type WorkflowRun = {
   createdAt: string;
   updatedAt: string;
 };
+
+export function isProviderType(value: unknown): value is ProviderType {
+  return (
+    value === "simulated" ||
+    value === "openai" ||
+    value === "anthropic" ||
+    value === "local" ||
+    value === "custom-webhook"
+  );
+}
+
+export function getRunProviderMetadata(
+  run: WorkflowRun,
+): ProviderMetadata | null {
+  const metadata = run.outputPayload?.providerMetadata;
+  if (!metadata || typeof metadata !== "object") return null;
+
+  const provider = (metadata as { provider?: unknown }).provider;
+  if (!isProviderType(provider)) return null;
+
+  return metadata as ProviderMetadata;
+}
+
+export function getRunExecutionProvider(run: WorkflowRun): ProviderType {
+  return (
+    getRunProviderMetadata(run)?.provider ??
+    run.workflow?.providerType ??
+    "simulated"
+  );
+}
 
 export type WorkflowLog = {
   id: string;
