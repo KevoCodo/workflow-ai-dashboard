@@ -1,54 +1,59 @@
-# Launch Checklist (Public Portfolio)
+# Launch Checklist
 
-Use this before sharing the repo publicly (GitHub, LinkedIn, recruiter screens, demo videos).
+Use this before sharing the repo publicly in GitHub, LinkedIn, recruiter screens, ContextFlow, or demo videos.
 
 ## Docs and copy
 - README completed and accurate.
-- Docs reviewed and match the implementation (`docs/`).
-- Case study completed (`docs/CASE_STUDY.md`).
-- Portfolio copy completed (`docs/PORTFOLIO_COPY.md`).
-- Screenshot guidance present (`docs/screenshots/README.md`).
-- Diagram guidance present (`docs/diagrams/architecture.md`).
+- Docs reviewed and matched to the implementation.
+- Case study completed: `docs/CASE_STUDY.md`.
+- Portfolio copy completed: `docs/PORTFOLIO_COPY.md`.
+- Screenshot guidance present: `docs/screenshots/README.md`.
+- Architecture diagram guidance present: `docs/diagrams/architecture.md`.
 
-## Safety (public GitHub safe)
-- No secrets committed (`.env*` ignored; no API keys in code or docs).
-- No private company/client data in seeded workflows, sample runs, or screenshots.
+## Safety
+- No secrets committed.
+- `.env*` files remain ignored except safe examples.
+- No private company, client, or customer data in seed content, screenshots, or docs.
 - No proprietary business logic, internal prompts, or private system references.
+- Optional OpenAI execution is disabled unless explicitly configured with sanitized demo data.
 
 ## Environment files
 - `apps/api/.env.example` present and current.
 - `apps/web/.env.example` present and current.
-- Root `.env` (optional) is git-ignored.
+- Root `.env` is git-ignored.
 
 ## Local run verification
-- Postgres starts locally (Docker): `docker compose up -d postgres`.
-- Backend starts locally: `npm run dev:api` and `GET /health` returns ok.
-- Frontend starts locally: `npm run dev:web` and pages load.
-- Seed data works:
-  - Workflows are seeded on startup.
-  - Sample runs are seeded when DB has zero runs (non-production).
-- Demo flow tested end-to-end:
-  - Create/edit workflow template
-  - Create workflow run
-  - View run logs + output
-  - Verify analytics dashboard populates
-  - Verify `GET /providers` and architecture page
+- Postgres starts locally with `docker compose up -d postgres`.
+- Backend starts with `npm run dev:api`.
+- `GET /health` returns ok.
+- Frontend starts with `npm run dev:web`.
+- Dashboard loads.
+- Metrics populate.
+- Workflow catalog loads.
+- Seeded demo templates render schema-driven forms.
+- Simulated provider runs complete successfully.
+- Failed retry-eligible runs show retry actions.
+- Retry flow creates linked retry runs.
+- Run history filters work by status and provider.
+- `GET /providers` shows safe provider configuration status.
+- Architecture page loads.
 
-## Docker verification (optional)
+## Docker verification
 - `docker compose up` starts `postgres`, `api`, and `web`.
-- Ports are documented (`POSTGRES_PORT`, `WEB_PORT`, `API_PORT`) and conflicts are handled.
+- Ports are documented: `POSTGRES_PORT`, `WEB_PORT`, `API_PORT`.
 
 ## Screenshot capture
-- Dashboard overview (stats + recent activity + status breakdown)
+- Dashboard metrics
 - Workflow catalog
-- Workflow template editor (create/edit)
-- Workflow run detail showing timeline logs and JSON input/output payloads
-- Analytics/observability sections (usage, success rate, recent activity)
-- Architecture/provider adapter page
+- Workflow execution form
+- Execution timeline
+- Failed run with retry option
+- Provider configuration
+- Architecture page
 
-## GitHub metadata (recommended)
+## GitHub metadata
 Suggested repo description:
-- Public fullstack AI workflow orchestration dashboard demonstrating schema-driven templates, simulated provider execution, workflow logs, analytics, and operational dashboard patterns.
+- Public fullstack AI workflow orchestration dashboard demonstrating schema-driven templates, provider-based execution, failure handling, retries, timeline logs, and operational metrics.
 
 Suggested topics:
 - nextjs
@@ -62,8 +67,17 @@ Suggested topics:
 - fullstack
 - systems-engineering
 
-## LinkedIn launch (optional)
+## LinkedIn launch
 - LinkedIn Featured description added.
-- LinkedIn post drafted (see `docs/PORTFOLIO_COPY.md`).
-- 3–6 screenshots or a short demo clip ready.
-- MVP boundaries stated clearly (simulation-default, optional provider opt-in only, public-safe, no private data).
+- LinkedIn post drafted from `docs/PORTFOLIO_COPY.md`.
+- Three to six screenshots or a short demo clip ready.
+- MVP boundaries stated clearly: simulation-default, optional provider opt-in only, public-safe, no private data.
+
+## Future roadmap documented only
+- Anthropic provider
+- Local LLM provider
+- Background workers
+- Scheduled retries
+- Human review queue
+- Evaluation scoring
+- Role-based access

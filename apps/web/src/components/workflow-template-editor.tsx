@@ -194,7 +194,7 @@ export function WorkflowTemplateEditor({
                 }
               />
               <div className="text-xs text-muted-foreground">
-                Lowercase with hyphens (example: <code>report-summary</code>).
+                Lowercase with hyphens (example: <code>content-summary</code>).
               </div>
               {errors.slug ? (
                 <div className="text-xs text-rose-700">{errors.slug}</div>

@@ -1,11 +1,9 @@
 # AI Workflow Automation Dashboard
 
-Public fullstack portfolio project demonstrating workflow orchestration patterns: schema-driven workflow templates, simulated provider execution, run lifecycle tracking, execution logs, and lightweight observability metrics.
+## Project Overview
+AI Workflow Automation Dashboard is a public-safe fullstack portfolio project that demonstrates workflow orchestration patterns for AI-enabled operations: schema-driven workflow templates, provider-based execution, run lifecycle tracking, execution timelines, failure handling, retries, and lightweight metrics.
 
-This repo is intentionally scoped as a public-safe MVP (not a production SaaS).
-
-## Why This Project Exists
-Many "AI automation" demos stop at prompts. Real operational value comes from repeatable workflows, structured inputs/outputs, execution visibility, and traceability. This project is a public, sanitized showcase of those orchestration patterns without requiring external credentials or private data.
+Many "AI automation" demos stop at prompts. Real operational value comes from repeatable workflows, structured inputs/outputs, execution visibility, and traceability. This project shows those patterns without requiring private data, external credentials, authentication, billing, or production SaaS scope.
 
 ## What This Project Demonstrates
 - Fullstack engineering (Next.js UI + NestJS API + PostgreSQL persistence)
@@ -14,26 +12,27 @@ Many "AI automation" demos stop at prompts. Real operational value comes from re
 - Schema-driven UI forms (workflow-defined inputs)
 - Simulated AI execution (deterministic, credential-free) with an optional OpenAI adapter
 - Execution logging (timeline-style steps per run)
-- Lightweight observability metrics (success rate, usage, recent activity)
+- Lightweight observability metrics (total, successful, failed, retried runs, success rate, average runtime)
 - Operational dashboard design (status-driven UX, traceability)
 - Public-safe AI systems thinking (opt-in real-provider execution with safe defaults)
 
-## Core Features (MVP)
+## Tech Stack
+- Frontend: Next.js App Router, React, TypeScript, Tailwind CSS
+- Backend: NestJS REST API, TypeScript, TypeORM
+- Database: PostgreSQL
+- Local infra: Docker Compose
+
+## Core Features
 - Workflow template catalog (seeded) and admin-lite template CRUD (create/edit/deactivate)
 - Schema-driven workflow input forms generated from `inputSchema`
 - Workflow runs with deterministic lifecycle: `queued` -> `running` -> `completed` / `failed`
-- Run history and run detail pages with ordered logs and structured output payloads
-- Failed run retry flow for retry-eligible failures; retries create a new linked run and preserve the original failed run
-- Analytics endpoints + dashboard observability views (status breakdown, usage, recent activity)
+- Run history filters by status and provider
+- Run detail pages with ordered logs, normalized execution events, failure metadata, and structured output payloads
+- Failed-run retry flow for retry-eligible failures; retries create a new linked run and preserve the original failed run
+- Analytics endpoints + dashboard observability views with simple metric cards
 - Provider adapter layer (`simulated` by default; optional feature-flagged `openai`; future placeholders visible but non-executable)
 - Workflow create/edit provider selector with backend-reported availability status
-- Seeded `AI Business Summary Workflow` for safe provider adapter demonstrations
-
-## Tech Stack
-- Frontend: Next.js (App Router), React, TypeScript, Tailwind CSS
-- Backend: NestJS (REST), TypeScript, TypeORM
-- Database: PostgreSQL
-- Local infra: Docker Compose (Postgres; optional full stack)
+- Seeded public-safe demo templates: Content Summary, Meeting Notes, Lead Qualification, Blog Outline, and Customer Support Response
 
 ## Architecture Overview
 ```
@@ -41,7 +40,12 @@ Browser (Next.js UI)
   |
   | REST/JSON
   v
-NestJS API (Workflows + Runs + Logs + Analytics)
+NestJS API
+  |-- Workflow Service
+  |-- Workflow Run / Retry Service
+  |-- Failure Classifier
+  |-- Event + Log Services
+  |-- Metrics / Analytics Service
   |
   | resolve provider
   v
@@ -52,10 +56,10 @@ Provider Registry
   |
   | TypeORM
   v
-PostgreSQL (workflow, workflow_run, workflow_log)
+PostgreSQL (workflow, workflow_run, workflow_log, workflow_event)
 ```
 
-## Provider Adapter (Architecture Readiness)
+## Provider Architecture
 Workflows include `providerType` (default: `simulated`). The API resolves a provider through a small registry and executes via an interface so future providers can be added behind feature flags without changing the workflow/run API contract.
 
 Executable providers:
@@ -98,16 +102,35 @@ Not implemented (intentionally out of scope):
   - `provider_execution_completed` (or `provider_execution_failed`)
   - `completed` (or `failed`)
 
-## Analytics / Observability
-The API exposes lightweight aggregation endpoints and the dashboard renders:
-- Workflow counts (active/inactive)
-- Run counts by status and recent activity
-- Success rate and average execution time
-- Workflow usage summary (runs + health per template)
+## Failure Handling & Retries
+Failed runs store a public-safe failure reason, failure category, retry eligibility flag, and last error timestamp. Failure categories are `provider_error`, `timeout`, `network`, `validation`, `system`, and `unknown`.
+
+Retries are explicit user actions through `POST /workflow-runs/:id/retry`. The retry flow validates that the original run failed, is retry eligible, has retry attempts remaining, still has a workflow template, and uses an implemented/enabled provider. A retry creates a linked run with `retriedFromRunId` and an incremented `retryCount`; the original failed run stays unchanged for traceability.
+
+## Metrics & Observability
+The dashboard focuses on screenshot-ready operational metrics:
+- Total runs
+- Successful runs
+- Failed runs
+- Retried runs
+- Success rate
+- Average runtime
+
+Additional observability views include recent activity, provider distribution, workflow usage, status breakdowns, and normalized execution timelines.
+
+## Demo Workflows
+The API seeds a small public-safe template set for screenshots, interviews, and local demos:
+- `Content Summary` (`content-summary`) - content, audience, tone
+- `Meeting Notes` (`meeting-notes`) - notes, follow-up style
+- `Lead Qualification` (`lead-qualification`) - lead details, business type
+- `Blog Outline` (`blog-outline`) - topic, audience, keyword
+- `Customer Support Response` (`customer-support-response`) - customer message, tone
+
+Each seeded template defaults to the `simulated` provider. OpenAI remains optional and only executes when explicitly selected and configured in the backend environment.
 
 ## Demo Flow
 1. View workflow templates (catalog)
-2. Open the seeded `AI Business Summary Workflow` or create/edit a template
+2. Open a seeded demo template such as `Content Summary`, `Meeting Notes`, or `Customer Support Response`
 3. Keep `simulated` selected for the recommended demo path, or select `openai` to show opt-in provider architecture
 4. Submit sanitized schema-driven workflow input
 5. Run provider execution
@@ -117,7 +140,7 @@ The API exposes lightweight aggregation endpoints and the dashboard renders:
 9. Review dashboard analytics and provider distribution
 10. Review provider architecture (`GET /providers` + Architecture page)
 
-## Local Development
+## Local Setup
 ### Prerequisites
 - Node.js 20+
 - Docker Desktop (for Postgres)
@@ -196,12 +219,13 @@ If you open the web UI via a non-localhost address (for example, a WSL/Docker/VM
 
 ## Screenshots
 See `docs/screenshots/README.md` for a suggested screenshot list. Recommended set:
-- Dashboard overview
+- Dashboard metrics
 - Workflow catalog
-- Workflow template editor
-- Workflow run detail (logs + output)
-- Analytics/observability sections
-- Architecture/provider adapter page
+- Workflow execution form
+- Execution timeline
+- Failed run with retry option
+- Provider configuration
+- Architecture page
 
 ## Project Status
 - Status: MVP complete and ready for public showcase
@@ -217,12 +241,15 @@ See `docs/screenshots/README.md` for a suggested screenshot list. Recommended se
 - Anthropic, local, and custom webhook integrations are registry placeholders only
 - Public portfolio showcase only (not production-hardened)
 
-## Future Improvements (not in MVP)
-- Additional optional real providers behind feature flags (Anthropic/local models)
-- Multi-attempt dashboard grouping for retry chains
-- Optional external workflow engine adapters (e.g., n8n)
-- Streaming run updates (SSE/WebSockets)
-- Async execution via a queue/worker
+## Future Roadmap
+Documented future work only, not implemented in this MVP:
+- Anthropic provider
+- Local LLM provider
+- Background workers
+- Scheduled retries
+- Human review queue
+- Evaluation scoring
+- Role-based access
 
 ## Public-safe disclaimer
 - No secrets committed

@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { api, type WorkflowRun, type WorkflowRunStatus } from "../../lib/api";
+import {
+  api,
+  getRunExecutionProvider,
+  type ProviderType,
+  type WorkflowRun,
+} from "../../lib/api";
 import {
   Card,
   CardContent,
@@ -21,12 +26,30 @@ type State =
   | { kind: "error"; message: string }
   | { kind: "ready"; runs: WorkflowRun[] };
 
+type RunStatusFilter = "all" | "completed" | "failed" | "running" | "retried";
+type RunProviderFilter = "all" | Extract<ProviderType, "simulated" | "openai">;
+
+function isRetriedRun(run: WorkflowRun): boolean {
+  return Boolean(run.retriedFromRunId) || (run.retryCount ?? 0) > 0;
+}
+
+function matchesStatusFilter(
+  run: WorkflowRun,
+  statusFilter: RunStatusFilter,
+): boolean {
+  if (statusFilter === "all") return true;
+  if (statusFilter === "retried") return isRetriedRun(run);
+  if (statusFilter === "running") {
+    return run.status === "running" || run.status === "queued";
+  }
+  return run.status === statusFilter;
+}
+
 export default function RunsPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
-  const [statusFilter, setStatusFilter] = useState<WorkflowRunStatus | "all">(
-    "all",
-  );
-  const [workflowFilter, setWorkflowFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<RunStatusFilter>("all");
+  const [providerFilter, setProviderFilter] =
+    useState<RunProviderFilter>("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -50,23 +73,14 @@ export default function RunsPage() {
   const rows = useMemo(() => {
     if (state.kind !== "ready") return [];
     return state.runs.filter((run) => {
-      if (statusFilter !== "all" && run.status !== statusFilter) return false;
-      const slug = run.workflow?.slug ?? null;
-      if (workflowFilter !== "all" && slug !== workflowFilter) return false;
+      if (!matchesStatusFilter(run, statusFilter)) return false;
+      const provider = getRunExecutionProvider(run);
+      if (providerFilter !== "all" && provider !== providerFilter) {
+        return false;
+      }
       return true;
     });
-  }, [state, statusFilter, workflowFilter]);
-
-  const filterOptions = useMemo(() => {
-    if (state.kind !== "ready") return [];
-    const slugs = new Map<string, string>();
-    for (const run of state.runs) {
-      if (run.workflow?.slug && run.workflow?.name) {
-        slugs.set(run.workflow.slug, run.workflow.name);
-      }
-    }
-    return Array.from(slugs.entries()).sort((a, b) => a[1].localeCompare(b[1]));
-  }, [state]);
+  }, [state, statusFilter, providerFilter]);
 
   return (
     <div className="space-y-8">
@@ -104,7 +118,7 @@ export default function RunsPage() {
         </Card>
       )}
 
-      {state.kind === "ready" && rows.length === 0 && (
+      {state.kind === "ready" && state.runs.length === 0 && (
         <Card>
           <CardHeader>
             <CardTitle>No runs yet</CardTitle>
@@ -122,7 +136,7 @@ export default function RunsPage() {
         </Card>
       )}
 
-      {state.kind === "ready" && rows.length > 0 && (
+      {state.kind === "ready" && state.runs.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Run history</CardTitle>
@@ -137,32 +151,31 @@ export default function RunsPage() {
                   className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   value={statusFilter}
                   onChange={(e) =>
-                    setStatusFilter(e.target.value as WorkflowRunStatus | "all")
+                    setStatusFilter(e.target.value as RunStatusFilter)
                   }
                 >
                   <option value="all">All</option>
-                  <option value="queued">Queued</option>
-                  <option value="running">Running</option>
                   <option value="completed">Completed</option>
                   <option value="failed">Failed</option>
+                  <option value="running">Running</option>
+                  <option value="retried">Retried</option>
                 </select>
               </div>
 
               <div className="space-y-1">
                 <div className="text-xs font-medium text-muted-foreground">
-                  Workflow
+                  Provider
                 </div>
                 <select
                   className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  value={workflowFilter}
-                  onChange={(e) => setWorkflowFilter(e.target.value)}
+                  value={providerFilter}
+                  onChange={(e) =>
+                    setProviderFilter(e.target.value as RunProviderFilter)
+                  }
                 >
-                  <option value="all">All</option>
-                  {filterOptions.map(([slug, name]) => (
-                    <option key={slug} value={slug}>
-                      {name}
-                    </option>
-                  ))}
+                  <option value="all">All Providers</option>
+                  <option value="simulated">Simulated</option>
+                  <option value="openai">OpenAI</option>
                 </select>
               </div>
 
@@ -176,72 +189,102 @@ export default function RunsPage() {
               </div>
             </div>
 
-            <div className="overflow-auto">
-              <table className="w-full min-w-[860px] text-left text-sm">
-                <thead className="border-b border-border text-xs text-muted-foreground">
-                  <tr>
-                    <th className="py-2 pr-4 font-medium">Run ID</th>
-                    <th className="py-2 pr-4 font-medium">Workflow</th>
-                    <th className="py-2 pr-4 font-medium">Status</th>
-                    <th className="py-2 pr-4 font-medium">Created</th>
-                    <th className="py-2 pr-4 font-medium">Duration</th>
-                    <th className="py-2 pr-4 font-medium">Completed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((run) => {
-                    const durationMs =
-                      run.startedAt && run.completedAt
-                        ? new Date(run.completedAt).getTime() -
-                          new Date(run.startedAt).getTime()
-                        : null;
+            {rows.length === 0 ? (
+              <div className="rounded-lg border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                No workflow runs match this filter.
+              </div>
+            ) : (
+              <div className="overflow-auto">
+                <table className="w-full min-w-[860px] text-left text-sm">
+                  <thead className="border-b border-border text-xs text-muted-foreground">
+                    <tr>
+                      <th className="py-2 pr-4 font-medium">Run ID</th>
+                      <th className="py-2 pr-4 font-medium">Workflow</th>
+                      <th className="py-2 pr-4 font-medium">Status</th>
+                      <th className="py-2 pr-4 font-medium">Provider</th>
+                      <th className="py-2 pr-4 font-medium">Retry Count</th>
+                      <th className="py-2 pr-4 font-medium">Created</th>
+                      <th className="py-2 pr-4 font-medium">Duration</th>
+                      <th className="py-2 pr-4 font-medium">Completed</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((run) => {
+                      const durationMs =
+                        run.startedAt && run.completedAt
+                          ? new Date(run.completedAt).getTime() -
+                            new Date(run.startedAt).getTime()
+                          : null;
 
-                    return (
-                      <tr
-                        key={run.id}
-                        className="border-b border-border/60 hover:bg-muted/40"
-                      >
-                        <td className="py-3 pr-4 align-top">
-                          <Link className="underline" href={`/runs/${run.id}`}>
-                            <code className="text-xs">{run.id}</code>
-                          </Link>
-                        </td>
-                        <td className="py-3 pr-4 align-top">
-                          <div className="font-medium">
-                            {run.workflow?.name ?? run.workflowId}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            <code>{run.workflow?.slug ?? run.workflowId}</code>
-                          </div>
-                        </td>
-                        <td className="py-3 pr-4 align-top">
-                          <RunStatusBadge status={run.status} />
-                        </td>
-                        <td className="py-3 pr-4 align-top">
-                          <div className="text-xs text-muted-foreground">
-                            {formatRelativeTime(run.createdAt)}
-                          </div>
-                          <div className="text-xs">
-                            {formatDateTime(run.createdAt)}
-                          </div>
-                        </td>
-                        <td className="py-3 pr-4 align-top text-xs text-muted-foreground">
-                          {formatDurationMs(durationMs)}
-                        </td>
-                        <td className="py-3 pr-4 align-top">
-                          <div className="text-xs text-muted-foreground">
-                            {formatRelativeTime(run.completedAt)}
-                          </div>
-                          <div className="text-xs">
-                            {formatDateTime(run.completedAt)}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      return (
+                        <tr
+                          key={run.id}
+                          className="border-b border-border/60 hover:bg-muted/40"
+                        >
+                          <td className="py-3 pr-4 align-top">
+                            <Link
+                              className="underline"
+                              href={`/runs/${run.id}`}
+                            >
+                              <code className="text-xs">{run.id}</code>
+                            </Link>
+                          </td>
+                          <td className="py-3 pr-4 align-top">
+                            <div className="font-medium">
+                              {run.workflow?.name ?? run.workflowId}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              <code>
+                                {run.workflow?.slug ?? run.workflowId}
+                              </code>
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4 align-top">
+                            <RunStatusBadge status={run.status} />
+                          </td>
+                          <td className="py-3 pr-4 align-top text-xs text-muted-foreground">
+                            <code>{getRunExecutionProvider(run)}</code>
+                            {run.workflow?.providerType &&
+                            run.workflow.providerType !==
+                              getRunExecutionProvider(run) ? (
+                              <div className="mt-1 text-[11px]">
+                                Current workflow:{" "}
+                                <code>{run.workflow.providerType}</code>
+                              </div>
+                            ) : null}
+                          </td>
+                          <td className="py-3 pr-4 align-top text-xs text-muted-foreground">
+                            {run.retryCount ?? 0}
+                            {isRetriedRun(run) ? (
+                              <div className="mt-1">Retried run</div>
+                            ) : null}
+                          </td>
+                          <td className="py-3 pr-4 align-top">
+                            <div className="text-xs text-muted-foreground">
+                              {formatRelativeTime(run.createdAt)}
+                            </div>
+                            <div className="text-xs">
+                              {formatDateTime(run.createdAt)}
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4 align-top text-xs text-muted-foreground">
+                            {formatDurationMs(durationMs)}
+                          </td>
+                          <td className="py-3 pr-4 align-top">
+                            <div className="text-xs text-muted-foreground">
+                              {formatRelativeTime(run.completedAt)}
+                            </div>
+                            <div className="text-xs">
+                              {formatDateTime(run.completedAt)}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div className="mt-3 text-xs text-muted-foreground">
               Click a run ID to view details and logs.
             </div>

@@ -80,7 +80,7 @@ This roadmap keeps the project focused and portfolio-friendly. Each phase should
 
 - Expose provider selection in workflow create/edit forms with `simulated` as the recommended default
 - Surface backend provider availability, safe run metadata, and provider lifecycle log events in the UI
-- Seed a sanitized `AI Business Summary Workflow` for optional provider demonstrations
+- Seed a sanitized provider-demo workflow for optional provider demonstrations
 - Add lightweight dashboard provider distribution using existing run/workflow data
 
 ## Phase 14A: Provider registry expansion and failure readiness (completed)
@@ -113,9 +113,40 @@ This roadmap keeps the project focused and portfolio-friendly. Each phase should
 - Record retry-specific workflow events and logs for timeline visibility
 - Surface retry availability and a run detail retry action in the UI
 
+## Phase 17A: Metrics cards polish (completed)
+
+- Focus the dashboard summary on six screenshot-ready metric cards
+- Include total, successful, failed, and retried runs
+- Show success rate and average runtime using the existing analytics endpoint
+- Avoid adding charts, graphs, trends, or date filtering
+
+## Phase 17B: Run list filters (completed)
+
+- Add simple run history filters for all, completed, failed, running, and retried runs
+- Add provider filtering for simulated and OpenAI runs
+- Preserve the existing run list layout while showing provider and retry count
+- Keep empty filter states clear without adding search, sorting, charts, or date ranges
+
+## Phase 18A: Demo workflow templates (completed)
+
+- Seed public-safe demo templates for Content Summary, Meeting Notes, Lead Qualification, Blog Outline, and Customer Support Response
+- Keep seeded templates generic, screenshot-ready, and defaulted to the simulated provider
+- Add deterministic simulated outputs for each demo template
+- Preserve existing workflow CRUD and provider behavior without adding builders, new providers, or complex template logic
+
+## Phase 18B: Final portfolio wrap-up (completed)
+
+- Finalize README structure for public portfolio review and ContextFlow preparation
+- Review core docs for alignment with the implemented provider layer, retry flow, metrics, filters, and demo templates
+- Update screenshot guidance and architecture diagram docs
+- Keep future roadmap documented only without adding new runtime scope
+
 ## Future phases (out of scope for MVP)
 
-- Additional optional real provider connectors behind feature flags
-- Streaming updates (SSE/WebSockets)
-- Async execution (queue + worker)
-- Authentication/billing only if explicitly requested later
+- Anthropic provider behind feature flags
+- Local LLM provider behind feature flags
+- Background workers
+- Scheduled retries
+- Human review queue
+- Evaluation scoring
+- Role-based access

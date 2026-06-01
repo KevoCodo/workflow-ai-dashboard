@@ -1,26 +1,22 @@
-# Portfolio Copy (Reusable)
+# Portfolio Copy
 
-Use this doc to quickly generate consistent, public-safe copy for resumes, GitHub, and LinkedIn.
+Use this doc for resumes, GitHub, LinkedIn, ContextFlow, and interview walkthroughs.
 
-## Short project summary (1–2 sentences)
-A public fullstack AI workflow orchestration dashboard demonstrating schema-driven workflow templates, simulated provider execution, run lifecycle tracking, execution logs, analytics, and provider adapter architecture using Next.js, NestJS, PostgreSQL, and TypeORM.
+## Short Summary
+AI Workflow Automation Dashboard is a public-safe fullstack portfolio project that demonstrates workflow orchestration patterns: schema-driven templates, provider-based execution, failure handling, retries, execution timelines, and lightweight observability.
 
-## Longer project summary (4–6 sentences)
-AI Workflow Automation Dashboard is a public portfolio MVP focused on operational workflow orchestration patterns rather than prompt demos. The app models workflow templates with schema-driven input forms, routes execution through a provider registry (simulated by default with an optional disabled-by-default OpenAI adapter), and tracks each run through status transitions with ordered logs for traceability. Runs and logs persist to PostgreSQL via TypeORM, enabling a realistic run history and structured output payloads. The dashboard adds lightweight observability metrics (status breakdown, usage, recent activity, success rate) to support systems and operations discussion in interviews. The MVP intentionally excludes authentication and billing, while keeping real provider execution opt-in and restricted to sanitized demo inputs.
+## Longer Summary
+AI Workflow Automation Dashboard models realistic AI operations workflows without relying on private data or required external credentials. The app lets users browse public-safe workflow templates, submit schema-driven inputs, route execution through a provider registry, and inspect run status, logs, events, outputs, failure metadata, and retry history. The simulated provider is deterministic and credential-free, while the optional OpenAI adapter remains disabled unless explicitly configured. PostgreSQL persistence and dashboard metrics make the project useful for discussing reliability, traceability, and execution management patterns in interviews.
 
-## Resume bullet options
-- Built a public fullstack AI workflow orchestration dashboard using Next.js, NestJS, PostgreSQL, and TypeORM.
-- Implemented schema-driven workflow templates, simulated provider execution, run lifecycle tracking, execution logs, and analytics dashboards.
-- Designed a provider adapter architecture (registry + interface) to demonstrate future-ready execution routing while keeping the MVP public-safe.
+## Resume Bullets
+- Built a fullstack AI workflow orchestration dashboard using Next.js, NestJS, PostgreSQL, and TypeORM.
+- Implemented provider abstraction, workflow execution, failure handling, retries, and observability features.
+- Designed a public-safe AI operations platform demonstrating workflow reliability and execution management patterns.
 
-## LinkedIn Featured description (suggested)
-Public portfolio MVP: a workflow orchestration dashboard with schema-driven templates, simulated provider execution by default, an optional disabled-by-default OpenAI adapter, run lifecycle tracking, timeline logs, and lightweight analytics. Built with Next.js, NestJS, PostgreSQL, and TypeORM.
+## GitHub Repo Description
+Public fullstack AI workflow orchestration dashboard demonstrating schema-driven templates, provider-based execution, failure handling, retries, timeline logs, and operational metrics.
 
-## GitHub repo metadata (recommended)
-Suggested repo description:
-- Public fullstack AI workflow orchestration dashboard demonstrating schema-driven templates, simulated provider execution, workflow logs, analytics, and operational dashboard patterns.
-
-Suggested topics:
+## Suggested Topics
 - nextjs
 - nestjs
 - postgresql
@@ -32,29 +28,25 @@ Suggested topics:
 - fullstack
 - systems-engineering
 
-## Interview talking points
-- Why simulated execution first: deterministic demos, no credentials, safe for public GitHub.
-- This project originally used simulated execution only, then added an optional OpenAI provider adapter to demonstrate how provider abstraction supports real integrations without rewriting workflow orchestration logic.
-- Schema-driven workflows: reduces hardcoded UI and keeps workflow definitions as data.
-- Provider adapters: clean boundary for future integrations without changing domain APIs.
-- Logs and lifecycle: traceability for runs, debuggability, and operational UX patterns.
-- Observability metrics: lightweight aggregations derived from persisted run history.
-- Why this is more than CRUD: state transitions, orchestration boundaries, logging, analytics.
+## Interview Talking Points
+- Simulated execution keeps public demos deterministic, credential-free, and safe.
+- Provider abstraction allows optional real-provider adapters without changing the workflow/run contract.
+- Failure classification and retry execution demonstrate operational reliability patterns beyond CRUD.
+- Normalized workflow events and ordered logs make run behavior explainable.
+- Metrics stay lightweight and portfolio-focused: totals, success/failure counts, retries, success rate, runtime, recent activity, and provider distribution.
+- The MVP intentionally excludes authentication, billing, background workers, and evaluation queues to keep the project focused.
 
-## LinkedIn launch draft (copy/paste)
-I built a public portfolio project called **AI Workflow Automation Dashboard** to showcase workflow orchestration patterns that show up in real “AI automation” systems: structured inputs/outputs, execution visibility, and traceability.
+## LinkedIn Launch Draft
+I built **AI Workflow Automation Dashboard**, a public portfolio project focused on workflow orchestration patterns behind real AI operations tools.
 
-Stack: Next.js + NestJS + PostgreSQL + TypeORM.
+Stack: Next.js, NestJS, PostgreSQL, TypeORM.
 
 Highlights:
-- Schema-driven workflow templates (forms generated from the workflow definition)
-- Simulated provider execution by default, plus an optional feature-flagged OpenAI adapter
-- Run lifecycle tracking (`queued` -> `running` -> `completed/failed`)
-- Ordered execution logs + structured output payloads
-- Lightweight analytics for observability (status breakdown, usage, recent activity)
-- Provider adapter architecture (registry + interface) for future extensibility
+- Schema-driven workflow templates and input forms
+- Provider registry with deterministic simulated execution and optional OpenAI support
+- Run lifecycle tracking from queued to completed or failed
+- Failure classification, retry eligibility, and linked retry runs
+- Ordered logs, normalized execution timelines, and structured output payloads
+- Dashboard metrics and run filters for operational visibility
 
-This is intentionally an MVP: no auth, no billing, no private data, and no real provider execution unless explicitly enabled for sanitized demo inputs.
-
-If you want to review the repo or a quick walkthrough video, here it is: <link>
-
+This is intentionally scoped as a public-safe MVP: no auth, no billing, no private data, and no real provider execution unless explicitly enabled with sanitized demo inputs.

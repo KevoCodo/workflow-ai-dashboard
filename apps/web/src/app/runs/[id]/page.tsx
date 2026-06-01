@@ -9,7 +9,8 @@ import { JsonBlock } from "../../../components/json-block";
 import {
   getApiBaseUrl,
   getApiBaseUrlOrThrow,
-  type ProviderMetadata,
+  getRunExecutionProvider,
+  getRunProviderMetadata,
   type ProviderStatus,
   type WorkflowEvent,
   type WorkflowLog,
@@ -67,28 +68,11 @@ async function getProviders(): Promise<ProviderStatus[]> {
   return (await res.json()) as ProviderStatus[];
 }
 
-function getProviderMetadata(run: WorkflowRun): ProviderMetadata | null {
-  const metadata = run.outputPayload?.providerMetadata;
-  if (!metadata || typeof metadata !== "object") return null;
-
-  const provider = (metadata as { provider?: unknown }).provider;
-  if (
-    provider !== "simulated" &&
-    provider !== "openai" &&
-    provider !== "anthropic" &&
-    provider !== "local" &&
-    provider !== "custom-webhook"
-  ) {
-    return null;
-  }
-
-  return metadata as ProviderMetadata;
-}
-
 function displayRunError(run: WorkflowRun): string | null {
   if (!run.errorMessage) return null;
+  const runProviderType = getRunExecutionProvider(run);
   if (
-    run.workflow?.providerType === "openai" &&
+    runProviderType === "openai" &&
     (run.errorMessage.includes("OPENAI_API_KEY") ||
       run.errorMessage.includes("OpenAI provider is disabled") ||
       run.errorMessage.includes("not enabled for this local environment"))
@@ -218,9 +202,9 @@ export default async function RunDetailPage({
   const orderedEvents = [...events].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
-  const providerMetadata = getProviderMetadata(run);
+  const providerMetadata = getRunProviderMetadata(run);
   const visibleError = displayRunError(run);
-  const runProviderType = run.workflow?.providerType ?? "simulated";
+  const runProviderType = getRunExecutionProvider(run);
   const providerStatus =
     providers.find((provider) => provider.type === runProviderType) ?? null;
   const providerLifecycleSteps = new Set([
@@ -287,8 +271,15 @@ export default async function RunDetailPage({
               <div>
                 <div className="text-xs text-muted-foreground">Provider</div>
                 <div className="font-medium text-foreground/90">
-                  {run.workflow?.providerType ?? "-"}
+                  {runProviderType}
                 </div>
+                {run.workflow?.providerType &&
+                run.workflow.providerType !== runProviderType ? (
+                  <div className="text-xs text-muted-foreground">
+                    Current workflow provider:{" "}
+                    <code>{run.workflow.providerType}</code>
+                  </div>
+                ) : null}
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Started</div>
@@ -343,7 +334,7 @@ export default async function RunDetailPage({
                   <div>
                     <dt>Provider</dt>
                     <dd>
-                      <code>{run.workflow?.providerType ?? "-"}</code>
+                      <code>{runProviderType}</code>
                     </dd>
                   </div>
                   <div>

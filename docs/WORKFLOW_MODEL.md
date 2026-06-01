@@ -33,7 +33,7 @@ The provider adapter layer is an architecture readiness feature: it allows the e
 ### Provider selection behavior (Phase 13B)
 
 - Workflow create/edit forms expose implemented providers and display placeholder providers as disabled `coming soon` options.
-- New workflows and the seeded provider demo workflow default to `simulated`.
+- New workflows and seeded demo workflows default to `simulated`.
 - The UI may show availability from `GET /providers`, but selecting `openai` never bypasses backend configuration checks.
 - When OpenAI is disabled or missing configuration, the run fails with a public-safe message and remains traceable through provider lifecycle logs.
 
@@ -152,8 +152,8 @@ The optional OpenAI adapter may call the OpenAI API only for explicitly configur
 
 ## Seed data (demo readiness)
 
-- Workflows are seeded on API startup (idempotent upsert by `slug`).
-- `ai-business-summary` is a sanitized provider demo workflow seeded with `providerType: simulated`; it can be switched to `openai` explicitly for configured local demos.
+- Workflows are seeded on API startup (idempotent insert by `slug`; existing templates are not duplicated).
+- Seeded demo templates such as `content-summary`, `meeting-notes`, `lead-qualification`, `blog-outline`, and `customer-support-response` use `providerType: simulated` by default; they can be switched to `openai` explicitly for configured local demos.
 - Sample runs can also be seeded for screenshot-ready UI (only when the database has zero runs).
 
 ## Workflow template management (admin-lite)
@@ -178,7 +178,7 @@ inputSchema: {
   fields: Array<{
     name: string;
     label: string;
-    type: "text" | "textarea" | "number" | "select";
+    type: "text" | "textarea" | "number" | "select" | "json";
     required?: boolean;
     placeholder?: string;
     options?: Array<{ label: string; value: string }>; // select only
@@ -192,8 +192,9 @@ To support operational dashboard discussion without overbuilding, the API expose
 
 - Total workflows (active/inactive)
 - Total runs + status breakdown (queued/running/completed/failed)
-- Success rate (completed / (completed + failed))
-- Average execution time (finished runs with `startedAt` + `completedAt`)
+- Total, successful, failed, and retried runs
+- Success rate for the dashboard overview (successful runs / total runs)
+- Average runtime for completed runs with `startedAt` + `completedAt`
 - Recent activity (latest runs)
 - Workflow usage summary (runs and health per workflow)
 

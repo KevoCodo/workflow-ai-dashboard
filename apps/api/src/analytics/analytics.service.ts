@@ -31,19 +31,25 @@ export class AnalyticsService {
     activeWorkflows: number;
     inactiveWorkflows: number;
     totalRuns: number;
+    successfulRuns: number;
     completedRuns: number;
     failedRuns: number;
     queuedRuns: number;
     runningRuns: number;
+    retriedRuns: number;
     successRate: number;
+    averageRuntimeMs: number;
     averageExecutionTimeMs: number;
     mostUsedWorkflow: OverviewMostUsedWorkflow | null;
   }> {
-    const [totalWorkflows, activeWorkflows, inactiveWorkflows] = await Promise.all([
-      this.workflowsRepo.count(),
-      this.workflowsRepo.count({ where: { status: WorkflowStatus.Active } }),
-      this.workflowsRepo.count({ where: { status: WorkflowStatus.Inactive } }),
-    ]);
+    const [totalWorkflows, activeWorkflows, inactiveWorkflows] =
+      await Promise.all([
+        this.workflowsRepo.count(),
+        this.workflowsRepo.count({ where: { status: WorkflowStatus.Active } }),
+        this.workflowsRepo.count({
+          where: { status: WorkflowStatus.Inactive },
+        }),
+      ]);
 
     const statusRows = await this.runsRepo
       .createQueryBuilder('r')
@@ -59,14 +65,20 @@ export class AnalyticsService {
       failed: 0,
     };
     for (const row of statusRows) {
-      if (row?.status && row.status in counts) counts[row.status] = Number(row.count) || 0;
+      if (row?.status && row.status in counts)
+        counts[row.status] = Number(row.count) || 0;
     }
 
     const totalRuns =
       counts.queued + counts.running + counts.completed + counts.failed;
-    const finishedRuns = counts.completed + counts.failed;
     const successRate =
-      finishedRuns > 0 ? round1((counts.completed / finishedRuns) * 100) : 0;
+      totalRuns > 0 ? round1((counts.completed / totalRuns) * 100) : 0;
+
+    const retriedRuns = await this.runsRepo
+      .createQueryBuilder('r')
+      .where('r.retried_from_run_id IS NOT NULL')
+      .orWhere('r.retry_count > 0')
+      .getCount();
 
     const avgRow = await this.runsRepo
       .createQueryBuilder('r')
@@ -76,8 +88,11 @@ export class AnalyticsService {
       )
       .where('r.started_at IS NOT NULL')
       .andWhere('r.completed_at IS NOT NULL')
+      .andWhere('r.status = :status', { status: WorkflowRunStatus.Completed })
       .getRawOne<{ avgMs: string | null }>();
-    const averageExecutionTimeMs = avgRow?.avgMs ? Math.round(Number(avgRow.avgMs)) : 0;
+    const averageRuntimeMs = avgRow?.avgMs
+      ? Math.round(Number(avgRow.avgMs))
+      : 0;
 
     const mostUsed = await this.runsRepo
       .createQueryBuilder('r')
@@ -98,12 +113,15 @@ export class AnalyticsService {
       activeWorkflows,
       inactiveWorkflows,
       totalRuns,
+      successfulRuns: counts.completed,
       completedRuns: counts.completed,
       failedRuns: counts.failed,
       queuedRuns: counts.queued,
       runningRuns: counts.running,
+      retriedRuns,
       successRate,
-      averageExecutionTimeMs,
+      averageRuntimeMs,
+      averageExecutionTimeMs: averageRuntimeMs,
       mostUsedWorkflow: mostUsed ?? null,
     };
   }
@@ -128,7 +146,8 @@ export class AnalyticsService {
       failed: 0,
     };
     for (const row of rows) {
-      if (row?.status && row.status in counts) counts[row.status] = Number(row.count) || 0;
+      if (row?.status && row.status in counts)
+        counts[row.status] = Number(row.count) || 0;
     }
     return counts;
   }
@@ -217,8 +236,11 @@ export class AnalyticsService {
       const completedRuns = Number(row.completedRuns) || 0;
       const failedRuns = Number(row.failedRuns) || 0;
       const finished = completedRuns + failedRuns;
-      const successRate = finished > 0 ? round1((completedRuns / finished) * 100) : 0;
-      const averageExecutionTimeMs = row.avgMs ? Math.round(Number(row.avgMs)) : 0;
+      const successRate =
+        finished > 0 ? round1((completedRuns / finished) * 100) : 0;
+      const averageExecutionTimeMs = row.avgMs
+        ? Math.round(Number(row.avgMs))
+        : 0;
       return {
         workflowId: row.workflowId,
         workflowName: row.workflowName,
